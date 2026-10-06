@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ brand.product_name }}</title>
+<style>
+  :root {
+    --accent: {{ brand.accent }};
+    --bg: #f6f7f9; --card: #ffffff; --text: #1b1f24; --muted: #5b6573;
+    --line: #e2e6ec; --soft: #eef0ff; --ok: #15803d; --warn: #b45309; --bad: #b91c1c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1216; --card: #171b21; --text: #e8ebf0; --muted: #9aa5b4; --line: #2a313b; --soft: #1d2233; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 28px 16px 8px; max-width: 920px; margin: 0 auto; }
+  header h1 { margin: 0; font-size: 1.6rem; }
+  header p { margin: 4px 0 0; color: var(--muted); }
+  nav { max-width: 920px; margin: 16px auto 0; padding: 0 16px; display: flex; gap: 6px; flex-wrap: wrap; }
+  nav button { border: 1px solid var(--line); background: var(--card); color: var(--text); padding: 10px 14px;
+               border-radius: 10px; font: inherit; cursor: pointer; }
+  nav button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  main { max-width: 920px; margin: 12px auto 60px; padding: 0 16px; }
+  .panel { display: none; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+  .panel.active { display: block; }
+  h2 { margin: 0 0 4px; font-size: 1.25rem; }
+  .sub { color: var(--muted); margin: 0 0 18px; }
+  label { display: block; font-weight: 600; margin: 16px 0 4px; }
+  .hint { font-weight: 400; color: var(--muted); font-size: .9rem; }
+  input[type=text], input[type=password], textarea, select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--bg); color: var(--text); font: inherit; }
+  textarea { min-height: 84px; resize: vertical; }
+  input:focus, textarea:focus, select:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .row { grid-template-columns: 1fr; } }
+  .checks { display: grid; gap: 6px; margin-top: 6px; }
+  .checks label { font-weight: 400; margin: 0; display: flex; gap: 8px; align-items: flex-start; }
+  .btn { background: var(--accent); color: #fff; border: 0; padding: 12px 20px; border-radius: 10px; font: inherit;
+         font-weight: 600; cursor: pointer; margin-top: 20px; }
+  .btn.secondary { background: transparent; color: var(--text); border: 1px solid var(--line); font-weight: 500; margin-top: 0; padding: 7px 12px; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .banner { border-radius: 10px; padding: 10px 14px; margin: 14px 0; font-size: .95rem; }
+  .banner.demo { background: #fff7ed; border: 1px solid #fdba74; color: #9a3412; }
+  .banner.err { background: #fef2f2; border: 1px solid #fca5a5; color: var(--bad); }
+  .banner.info { background: var(--soft); border: 1px solid var(--line); }
+  @media (prefers-color-scheme: dark) {
+    .banner.demo { background: #2a1a0c; border-color: #7c4a1d; color: #fdba74; }
+    .banner.err { background: #2a1010; border-color: #7f1d1d; color: #fca5a5; }
+  }
+  .est { color: var(--muted); font-size: .9rem; margin-top: 8px; }
+  .progress { list-style: none; padding: 0; margin: 14px 0; }
+  .progress li { padding: 6px 0; color: var(--muted); }
+  .progress li:last-child { color: var(--text); font-weight: 600; }
+  .spin { display: inline-block; width: 12px; height: 12px; border: 2px solid var(--line); border-top-color: var(--accent);
+          border-radius: 50%; animation: s 0.8s linear infinite; margin-right: 8px; vertical-align: -1px; }
+  @keyframes s { to { transform: rotate(360deg); } }
+  details { border: 1px solid var(--line); border-radius: 12px; margin: 10px 0; background: var(--bg); }
+  summary { cursor: pointer; padding: 12px 14px; font-weight: 600; }
+  .body { padding: 0 16px 14px; overflow-x: auto; }
+  .tools { display: flex; gap: 8px; padding: 0 14px 10px; }
+  .md h2, .md h3, .md h4 { margin: 16px 0 6px; } .md p { margin: 8px 0; } .md ul, .md ol { padding-left: 22px; }
+  .md table { border-collapse: collapse; margin: 10px 0; font-size: .95rem; }
+  .md th, .md td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+  .md code { background: var(--soft); padding: 1px 5px; border-radius: 5px; }
+  .locked { opacity: .5; }
+  footer { max-width: 920px; margin: 0 auto 40px; padding: 0 16px; color: var(--muted); font-size: .85rem; }
+  .skip { position: absolute; left: -999px; } .skip:focus { left: 8px; top: 8px; background: #fff; color: #000; padding: 6px; z-index: 9; }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header>
+  <h1>{{ brand.product_name }}</h1>
+  <p>{{ brand.tagline }}</p>
+</header>
+
+<nav role="tablist" aria-label="Steps">
+  <button role="tab" data-tab="t1" aria-selected="true">1. Your business</button>
+  <button role="tab" data-tab="t2" aria-selected="false">2. Strategy</button>
+  <button role="tab" data-tab="t3" aria-selected="false">3. Daily post</button>
+  <button role="tab" data-tab="t4" aria-selected="false">Guide</button>
+</nav>
+
+<main id="main">
+  <!-- TAB 1 -->
+  <section class="panel active" id="t1" role="tabpanel">
+    <h2>Tell us about your business</h2>
+    <p class="sub">The more specific you are, the better the results. Nothing is posted anywhere. You stay in control.</p>
+
+    <div class="row">
+      <div><label for="biz">Business name</label>
+        <input id="biz" type="text" maxlength="120" placeholder="e.g. InvoiceWise"></div>
+      <div><label for="preset">Style preset <span class="hint">sets tone and content mix</span></label>
+        <select id="preset">{% for name in presets %}<option>{{ name }}</option>{% endfor %}</select></div>
+    </div>
+
+    <label for="offer">What do you sell? <span class="hint">one plain sentence</span></label>
+    <textarea id="offer" maxlength="600" placeholder="e.g. Software that automatically chases late client invoices for small agencies"></textarea>
+
+    <label for="aud">Who do you sell to? <span class="hint">optional rough idea. The AI will sharpen it</span></label>
+    <input id="aud" type="text" maxlength="600" placeholder="e.g. Agency owners with 10 to 50 staff">
+
+    <label for="goal">Your goal <span class="hint">use a number and a time</span></label>
+    <input id="goal" type="text" maxlength="300">
+
+    <label for="voice">Voice notes <span class="hint">optional. Words you like or hate</span></label>
+    <input id="voice" type="text" maxlength="600" placeholder="e.g. direct, no buzzwords, short sentences">
+
+    <label for="profile">Your current LinkedIn headline and About <span class="hint">paste it here, or leave empty</span></label>
+    <textarea id="profile" maxlength="4000"></textarea>
+
+    <label>Steps to run <span class="hint">untick a step to save time and cost</span></label>
+    <div class="checks">
+      <label><input type="checkbox" id="s_icp" checked> Define my ideal customer</label>
+      <label><input type="checkbox" id="s_research" checked> Research my market</label>
+      <label><input type="checkbox" id="s_profile" checked> Rewrite my headline and About section</label>
+      <label><input type="checkbox" id="s_plan" checked> Build a 30-day content plan</label>
+    </div>
+
+    <div class="row">
+      <div><label for="provider">AI provider <span class="hint">which company your key is from</span></label>
+        <select id="provider">
+          <option value="auto">Detect from my key</option>
+          <option value="anthropic">Claude (Anthropic)</option>
+          <option value="openai">OpenAI</option>
+        </select></div>
+      <div><label for="key">Your API key <span class="hint">leave empty to try demo mode</span></label>
+        <input id="key" type="password" autocomplete="off" placeholder="paste your key here"></div>
+    </div>
+    <div class="est" id="est"></div>
+
+    <div id="e1" class="banner err" hidden></div>
+    <button class="btn" id="go1">Build my strategy</button>
+  </section>
+
+  <!-- TAB 2 -->
+  <section class="panel" id="t2" role="tabpanel">
+    <h2>Your strategy</h2>
+    <p class="sub">Read every result. Edit anything that is wrong or does not sound like you.</p>
+    <div id="idle2" class="banner info">Nothing here yet. Fill in tab 1 and press <strong>Build my strategy</strong>.</div>
+    <div id="mode2"></div>
+    <ul class="progress" id="prog2" hidden></ul>
+    <div id="e2" class="banner err" hidden></div>
+    <div id="results"></div>
+    <button class="btn" id="dl" hidden>Download everything (.md)</button>
+  </section>
+
+  <!-- TAB 3 -->
+  <section class="panel" id="t3" role="tabpanel">
+    <h2>Write today's post</h2>
+    <p class="sub">The AI drafts. You review, edit and publish by hand.</p>
+    <div class="banner info"><label style="margin:0;font-weight:500"><input type="checkbox" id="appr">
+      I have read the strategy and I approve continuing. I will review every post before publishing it myself.</label></div>
+
+    <label for="topic">Post topic <span class="hint">type one, or copy one from your 30-day plan</span></label>
+    <input id="topic" type="text" maxlength="300" placeholder="e.g. Late invoices are a communication problem, not a money problem">
+
+    <label for="tone">Tone for this post only <span class="hint">optional. Leave empty to use your preset</span></label>
+    <input id="tone" type="text" maxlength="200">
+
+    <div id="mode3"></div>
+    <ul class="progress" id="prog3" hidden></ul>
+    <div id="e3" class="banner err" hidden></div>
+    <button class="btn" id="go3" disabled>Write today's post</button>
+    <div id="postOut"></div>
+  </section>
+
+  <!-- TAB 4 -->
+  <section class="panel" id="t4" role="tabpanel"><div class="md" id="guide"></div>
+    {% if brand.guide_url %}<p><a href="{{ brand.guide_url }}" target="_blank" rel="noopener">Open the full user guide</a></p>{% endif %}
+  </section>
+</main>
+<footer>
+  AI-generated drafts can contain mistakes. Verify facts before publishing.
+  {% if brand.support_email %} Need help? <a href="mailto:{{ brand.support_email }}">{{ brand.support_email }}</a>{% endif %}
+</footer>
+
+<script>
+const PRESETS = {{ presets | tojson }};
+const GUIDE = {{ guide | tojson }};
+const $ = id => document.getElementById(id);
+let strategy = null;   // last strategy result
+
+/* ---------- tiny, safe markdown renderer (escapes HTML first) ---------- */
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function inl(s){ s = esc(s);
+  s = s.replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+       .replace(/(^|[^*\w])\*([^*\s][^*]*)\*/g,'$1<em>$2</em>');
+  return s; }
+function md(src){
+  const L = (src||'').split('\n'); const out = []; let i = 0;
+  const block = l => /^(#{1,4}\s|\s*[-*]\s|\s*\d+\.\s|\s*\|)/.test(l);
+  while (i < L.length) {
+    const l = L[i]; let m;
+    if (/^\s*$/.test(l)) { i++; continue; }
+    if ((m = l.match(/^(#{1,4})\s+(.*)$/))) { const n = Math.min(m[1].length+1,4); out.push(`<h${n}>${inl(m[2])}</h${n}>`); i++; continue; }
+    if (/^\s*-{3,}\s*$/.test(l)) { out.push('<hr>'); i++; continue; }
+    if (/^\s*\|/.test(l) && i+1 < L.length && /^\s*\|[\s:|-]+\|?\s*$/.test(L[i+1])) {
+      const row = r => r.trim().replace(/^\||\|$/g,'').split('|').map(c => c.trim());
+      let h = '<table><thead><tr>' + row(l).map(c => `<th>${inl(c)}</th>`).join('') + '</tr></thead><tbody>'; i += 2;
+      while (i < L.length && /^\s*\|/.test(L[i])) { h += '<tr>' + row(L[i]).map(c => `<td>${inl(c)}</td>`).join('') + '</tr>'; i++; }
+      out.push(h + '</tbody></table>'); continue; }
+    if (/^\s*[-*]\s+/.test(l)) { let h = '<ul>'; while (i < L.length && /^\s*[-*]\s+/.test(L[i])) { h += `<li>${inl(L[i].replace(/^\s*[-*]\s+/,''))}</li>`; i++; } out.push(h + '</ul>'); continue; }
+    if (/^\s*\d+\.\s+/.test(l)) { let h = '<ol>'; while (i < L.length && /^\s*\d+\.\s+/.test(L[i])) { h += `<li>${inl(L[i].replace(/^\s*\d+\.\s+/,''))}</li>`; i++; } out.push(h + '</ol>'); continue; }
+    let p = []; while (i < L.length && !/^\s*$/.test(L[i]) && !block(L[i])) { p.push(L[i]); i++; }
+    if (!p.length) { p.push(L[i]); i++; }
+    out.push(`<p>${inl(p.join(' '))}</p>`);
+  }
+  return out.join('\n');
+}
+
+/* ---------- tabs ---------- */
+function show(tab){
+  document.querySelectorAll('nav button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === tab));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === tab));
+  window.scrollTo({top: 0});
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => show(b.dataset.tab));
+$('guide').innerHTML = md(GUIDE);
+
+/* ---------- form helpers ---------- */
+function setPreset(){ $('goal').placeholder = PRESETS[$('preset').value].goal; }
+function estimate(){
+  const n = 1 + ($('s_icp').checked?4:0) + ($('s_research').checked?5:0) + ($('s_profile').checked?6:0) + ($('s_plan').checked?8:0);
+  $('est').textContent = `About ${n} AI calls for the strategy (up to). Demo mode uses none.`;
+}
+['preset'].forEach(id => $(id).onchange = setPreset);
+['s_icp','s_research','s_profile','s_plan'].forEach(id => $(id).onchange = estimate);
+setPreset(); estimate();
+
+function collect(){ return {
+  business_name: $('biz').value, offer: $('offer').value, audience_hint: $('aud').value, goal: $('goal').value,
+  preset: $('preset').value, voice_notes: $('voice').value, current_profile: $('profile').value,
+  run_icp: $('s_icp').checked, run_research: $('s_research').checked, run_profile: $('s_profile').checked,
+  run_plan: $('s_plan').checked, api_key: $('key').value, provider: $('provider').value }; }
+
+function banner(el, text){ el.hidden = !text; el.textContent = text || ''; }
+function modeBanner(el, mode, engine){ el.innerHTML = mode === 'demo'
+  ? '<div class="banner demo"><strong>DEMO MODE.</strong> No API key was used, so this is sample text, not real AI output. Add your key on tab 1 for real results.</div>'
+  : (mode === 'real' && engine ? `<div class="banner info">Written by ${esc(engine)}.</div>` : ''); }
+function progress(el, lines, running){
+  el.hidden = !lines.length;
+  el.innerHTML = lines.map((t,i) => `<li>${(running && i === lines.length-1) ? '<span class="spin"></span>' : '&#10003; '}${esc(t)}</li>`).join(''); }
+
+async function post(url, body){
+  const r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || 'Something went wrong.'); return j; }
+
+async function poll(jobId, onTick){
+  for (;;) {
+    await new Promise(r => setTimeout(r, 1500));
+    const r = await fetch('/api/job/' + jobId); const j = await r.json();
+    onTick(j);
+    if (j.status !== 'running') return j;
+  }
+}
+
+/* ---------- strategy ---------- */
+function panel(title, text, open){
+  const id = 'p' + Math.random().toString(36).slice(2,8);
+  return `<details ${open?'open':''}><summary>${esc(title)}</summary>
+    <div class="tools"><button class="btn secondary" data-copy="${id}">Copy</button></div>
+    <div class="body md" id="${id}">${md(text)}</div><textarea hidden id="${id}_raw">${esc(text)}</textarea></details>`; }
+document.addEventListener('click', e => {
+  const id = e.target.dataset && e.target.dataset.copy; if (!id) return;
+  navigator.clipboard.writeText($(id + '_raw').value).then(() => { e.target.textContent = 'Copied'; setTimeout(() => e.target.textContent = 'Copy', 1500); }); });
+
+$('go1').onclick = async () => {
+  banner($('e1'), ''); const body = collect();
+  if (!body.offer.trim()) { banner($('e1'), 'Please describe what you sell (one sentence).'); $('offer').focus(); return; }
+  $('go1').disabled = true; show('t2'); $('idle2').hidden = true; $('results').innerHTML = ''; $('dl').hidden = true;
+  banner($('e2'), ''); modeBanner($('mode2'), ''); progress($('prog2'), ['Starting...'], true);
+  try {
+    const {job_id} = await post('/api/strategy', body);
+    const j = await poll(job_id, t => { modeBanner($('mode2'), t.mode, t.engine); progress($('prog2'), t.progress, t.status === 'running'); });
+    if (j.status === 'error') { banner($('e2'), j.error); progress($('prog2'), [], false); return; }
+    progress($('prog2'), j.progress, false); strategy = j.result;
+    const r = j.result;
+    $('results').innerHTML =
+      panel('1. Your ideal customer', r.icp, true) + panel('2. Market research brief', r.research, false) +
+      panel('3. Your new headline and About section', r.profile + (r.profile_log ? '\n\n---\n' + r.profile_log : ''), false) +
+      panel('4. 30-day content plan', [r.plan, r.weeks, r.changes ? '## Plan changes suggested\n' + r.changes : ''].join('\n\n'), false) +
+      panel('Before you approve, verify', r.review, true);
+    $('dl').hidden = false;
+  } catch (err) { banner($('e2'), err.message); $('idle2').hidden = true; progress($('prog2'), [], false); }
+  finally { $('go1').disabled = false; }
+};
+$('dl').onclick = () => {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([strategy.full], {type: 'text/markdown'}));
+  a.download = 'linkedin-strategy.md'; a.click(); };
+
+/* ---------- daily post ---------- */
+$('appr').onchange = () => { $('go3').disabled = !$('appr').checked; };
+$('go3').onclick = async () => {
+  banner($('e3'), ''); $('postOut').innerHTML = ''; modeBanner($('mode3'), '');
+  const body = Object.assign(collect(), {approved: $('appr').checked, topic: $('topic').value, tone: $('tone').value,
+                                         icp: strategy ? strategy.icp : ''});
+  $('go3').disabled = true; progress($('prog3'), ['Starting...'], true);
+  try {
+    const {job_id} = await post('/api/post', body);
+    const j = await poll(job_id, t => { modeBanner($('mode3'), t.mode, t.engine); progress($('prog3'), t.progress, t.status === 'running'); });
+    if (j.status === 'error') { banner($('e3'), j.error); progress($('prog3'), [], false); return; }
+    progress($('prog3'), j.progress, false);
+    $('postOut').innerHTML = panel('Your post package: review and edit before publishing', j.result.post, true);
+  } catch (err) { banner($('e3'), err.message); progress($('prog3'), [], false); }
+  finally { $('go3').disabled = !$('appr').checked; }
+};
+</script>
+</body>
+</html>
